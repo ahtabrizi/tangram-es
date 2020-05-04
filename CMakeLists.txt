@@ -1,13 +1,17 @@
 cmake_minimum_required(VERSION 3.2)
 
-project(tangram)
+# this policy needs to be enabled to link two libraries to each other
+# tangram to tangram-core AND tangram-core to tangram
+if (POLICY CMP0079)
+  cmake_policy(SET CMP0079 NEW)
+endif (POLICY CMP0079)
 
 # Options
 option(TANGRAM_USE_JSCORE "Use system libraries for JavaScriptCore and enable it on iOS and macOS" OFF)
 option(TANGRAM_USE_JSCORE_STATIC "Build with pre-compiled static libraries for JavaScriptCore" OFF)
 
-option(TANGRAM_USE_SYSTEM_FONT_LIBS "Use system libraries Freetype, ICU and Harfbuzz via pkgconfig" OFF)
-option(TANGRAM_USE_SYSTEM_GLFW_LIBS "Use system libraries for GLFW3 via pkgconfig" OFF)
+option(TANGRAM_USE_SYSTEM_FONT_LIBS "Use system libraries Freetype, ICU and Harfbuzz via pkgconfig" ON)
+option(TANGRAM_USE_SYSTEM_GLFW_LIBS "Use system libraries for GLFW3 via pkgconfig" ON)
 option(TANGRAM_USE_SYSTEM_SQLITE_LIBS "Use system libraries for SQLite via pkgconfig" OFF)
 option(TANGRAM_MBTILES_DATASOURCE "Build MBTiles Datasource" ON)
 
@@ -19,7 +23,7 @@ option(TANGRAM_DEV_MODE "For developers only: Don't omit the frame pointer" OFF)
 message(STATUS "Build type configuration: ${CMAKE_BUILD_TYPE}")
 
 # Check that submodules are present.
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/core/deps/harfbuzz-icu-freetype/harfbuzz/README")
+if(NOT EXISTS "${TANGRAM_DIR}/core/deps/harfbuzz-icu-freetype/harfbuzz/README")
   message(SEND_ERROR "Missing submodules - Please run:\n 'git submodule update --init'")
   return()
 endif()
@@ -56,7 +60,7 @@ if(TANGRAM_DEV_MODE AND TANGRAM_BUILD_BENCHMARKS)
 endif()
 
 set(TANGRAM_PLATFORM_CONFIG_FILE "platforms/${TANGRAM_PLATFORM}/config.cmake")
-if(EXISTS "${PROJECT_SOURCE_DIR}/${TANGRAM_PLATFORM_CONFIG_FILE}")
+if(EXISTS "${TANGRAM_DIR}/${TANGRAM_PLATFORM_CONFIG_FILE}")
   message(STATUS "Including platform CMake config file: ${TANGRAM_PLATFORM_CONFIG_FILE}")
 else()
   message(SEND_ERROR "Cannot find CMake config file for platform: ${TANGRAM_PLATFORM}. Looked for: ${TANGRAM_PLATFORM_CONFIG_FILE}")
@@ -64,7 +68,7 @@ else()
 endif()
 # Cache platform target.
 set(TANGRAM_PLATFORM ${TANGRAM_PLATFORM} CACHE INTERNAL "Tangram platform target" FORCE)
-# Include the platform config file.
+# # Include the platform config file.
 include(${TANGRAM_PLATFORM_CONFIG_FILE})
 
 # Choose JavaScript implementation.
@@ -98,3 +102,9 @@ if(TANGRAM_BUILD_BENCHMARKS)
   message(STATUS "Building benchmarks")
   add_subdirectory(bench)
 endif()
+
+# link tangram-core to tangram so solves undefined references in tangram-core 
+target_link_libraries(tangram-core
+  PUBLIC
+  tangram
+)
