@@ -1,3 +1,5 @@
+project(tangram)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-zero-variadic-macro-arguments")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
@@ -30,27 +32,35 @@ pkg_check_modules(FONTCONFIG REQUIRED "fontconfig")
 
 find_package(CURL REQUIRED)
 
-add_executable(tangram
+add_library(tangram
+  platforms/linux/src/linuxPlatform.h
   platforms/linux/src/linuxPlatform.cpp
-  platforms/linux/src/main.cpp
+  # platforms/linux/src/main.cpp
+  platforms/common/platform_gl.h
   platforms/common/platform_gl.cpp
+  platforms/common/imgui_impl_glfw.h
   platforms/common/imgui_impl_glfw.cpp
+  platforms/common/imgui_impl_opengl3.h
   platforms/common/imgui_impl_opengl3.cpp
+  platforms/common/urlClient.h
   platforms/common/urlClient.cpp
+  platforms/common/linuxSystemFontHelper.h
   platforms/common/linuxSystemFontHelper.cpp
+  platforms/common/glfwApp.h
   platforms/common/glfwApp.cpp
 )
 
 add_subdirectory(platforms/common/imgui)
 
 target_include_directories(tangram
-  PRIVATE
+  PUBLIC
   platforms/common
+  platforms/linux/src
   ${FONTCONFIG_INCLUDE_DIRS}
 )
 
 target_link_libraries(tangram
-  PRIVATE
+  PUBLIC
   tangram-core
   glfw
   imgui
@@ -80,5 +90,4 @@ target_compile_definitions(tangram
   PRIVATE
   NEXTZEN_API_KEY="${NEXTZEN_API_KEY}")
 
-
-add_resources(tangram "${PROJECT_SOURCE_DIR}/scenes" "res")
+add_resources(tangram "${TANGRAM_DIR}/scenes" "res")
