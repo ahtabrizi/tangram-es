@@ -90,4 +90,4 @@ target_compile_definitions(tangram
   PRIVATE
   NEXTZEN_API_KEY="${NEXTZEN_API_KEY}")
 
-add_resources(tangram "${TANGRAM_DIR}/scenes" "res")
+# add_resources(tangram "${TANGRAM_DIR}/scenes" "res")
