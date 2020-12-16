@@ -42,6 +42,7 @@ Temporary Items
 bin/
 gen/
 *.o.d
+*.d
 
 # Gradle files
 .gradle/
